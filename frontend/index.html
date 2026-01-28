@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ================================================
+         F1 Race Replay - Interactive Visualization Tool
+         ================================================
+         A modern web application for visualizing Formula 1
+         race data, telemetry, and car positions.
+         
+         Author: Aryan Raj
+         Created: 2026-01-28
+    -->
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="F1 Race Replay - Interactive Formula 1 race visualization and data analysis tool. View telemetry, lap times, and race positions.">
+    <meta name="keywords" content="F1, Formula 1, Race Replay, Telemetry, Visualization, Racing, Data Analysis">
+    <meta name="author" content="Aryan Raj">
+    
+    <!-- Open Graph Meta Tags for Social Sharing -->
+    <meta property="og:title" content="F1 Race Replay - Interactive Visualization Tool">
+    <meta property="og:description" content="Visualize Formula 1 races with real telemetry data, lap times, and driver positions.">
+    <meta property="og:type" content="website">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
+    
+    <!-- Google Fonts - Inter for modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <title>F1 Race Replay | Interactive Visualization Tool</title>
+</head>
+<body>
+    <!-- ================================================
+         Application Container
+         ================================================ -->
+    <div id="app" class="app-container">
+        
+        <!-- ============================================
+             Header / Top Navigation Bar
+             ============================================ -->
+        <header class="header" id="header">
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">🏎️</span>
+                    <h1 class="logo-text">F1 Race Replay</h1>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <!-- Race Selection Controls -->
+                <div class="race-selector" id="raceSelector">
+                    <div class="selector-group">
+                        <label for="seasonSelect" class="selector-label">Season</label>
+                        <select id="seasonSelect" class="selector-dropdown">
+                            <option value="">Loading...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="selector-group">
+                        <label for="raceSelect" class="selector-label">Race</label>
+                        <select id="raceSelect" class="selector-dropdown" disabled>
+                            <option value="">Select Season First</option>
+                        </select>
+                    </div>
+                    
+                    <div class="selector-group">
+                        <label for="sessionSelect" class="selector-label">Session</label>
+                        <select id="sessionSelect" class="selector-dropdown" disabled>
+                            <option value="R">Race</option>
+                            <option value="Q">Qualifying</option>
+                            <option value="S">Sprint</option>
+                            <option value="FP3">FP3</option>
+                            <option value="FP2">FP2</option>
+                            <option value="FP1">FP1</option>
+                        </select>
+                    </div>
+                    
+                    <button id="loadSessionBtn" class="btn btn-primary" disabled>
+                        <span class="btn-icon">▶</span>
+                        Load Session
+                    </button>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="status-indicator" id="statusIndicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Ready</span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- ============================================
+             Main Content Area
+             ============================================ -->
+        <main class="main-content" id="mainContent">
+            
+            <!-- Left Sidebar - Driver List & Standings -->
+            <aside class="sidebar sidebar-left" id="sidebarLeft">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">Drivers</h2>
+                    <span class="driver-count" id="driverCount">0 drivers</span>
+                </div>
+                
+                <div class="driver-list" id="driverList">
+                    <!-- Driver cards will be dynamically inserted here -->
+                    <div class="placeholder-message">
+                        <span class="placeholder-icon">👥</span>
+                        <p>Load a session to see drivers</p>
+                    </div>
+                </div>
+                
+                <div class="sidebar-footer">
+                    <div class="legend">
+                        <h3 class="legend-title">Tyre Compounds</h3>
+                        <div class="legend-items">
+                            <span class="tyre-indicator tyre-soft">S</span>
+                            <span class="tyre-indicator tyre-medium">M</span>
+                            <span class="tyre-indicator tyre-hard">H</span>
+                            <span class="tyre-indicator tyre-inter">I</span>
+                            <span class="tyre-indicator tyre-wet">W</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Center - Track Visualization -->
+            <section class="track-section" id="trackSection">
+                <!-- Track Info Banner -->
+                <div class="track-info" id="trackInfo">
+                    <div class="track-name-container">
+                        <h2 class="track-name" id="trackName">Select a Race</h2>
+                        <span class="track-country" id="trackCountry"></span>
+                    </div>
+                    <div class="lap-info" id="lapInfo">
+                        <span class="current-lap">Lap <span id="currentLap">--</span></span>
+                        <span class="lap-separator">/</span>
+                        <span class="total-laps"><span id="totalLaps">--</span></span>
+                    </div>
+                </div>
+                
+                <!-- Canvas Container for Track Rendering -->
+                <div class="track-canvas-container" id="trackCanvasContainer">
+                    <canvas id="trackCanvas" class="track-canvas"></canvas>
+                    
+                    <!-- Overlay for loading state -->
+                    <div class="canvas-overlay" id="canvasOverlay">
+                        <div class="loading-spinner"></div>
+                        <p class="loading-text">Loading track data...</p>
+                    </div>
+                    
+                    <!-- Empty state -->
+                    <div class="empty-state" id="emptyState">
+                        <div class="empty-icon">🏁</div>
+                        <h3>No Race Loaded</h3>
+                        <p>Select a season and race from the top menu to begin visualization</p>
+                    </div>
+                </div>
+                
+                <!-- Playback Controls -->
+                <div class="playback-controls" id="playbackControls">
+                    <div class="playback-buttons">
+                        <button class="playback-btn" id="skipBackBtn" title="Skip to Start">
+                            <span>⏮</span>
+                        </button>
+                        <button class="playback-btn" id="prevLapBtn" title="Previous Lap">
+                            <span>⏪</span>
+                        </button>
+                        <button class="playback-btn playback-btn-main" id="playPauseBtn" title="Play/Pause">
+                            <span id="playPauseIcon">▶</span>
+                        </button>
+                        <button class="playback-btn" id="nextLapBtn" title="Next Lap">
+                            <span>⏩</span>
+                        </button>
+                        <button class="playback-btn" id="skipEndBtn" title="Skip to End">
+                            <span>⏭</span>
+                        </button>
+                    </div>
+                    
+                    <div class="speed-control">
+                        <label for="speedSlider">Speed:</label>
+                        <input type="range" id="speedSlider" min="0.25" max="4" step="0.25" value="1">
+                        <span id="speedValue">1x</span>
+                    </div>
+                    
+                    <div class="timeline-container">
+                        <input type="range" id="timelineSlider" class="timeline-slider" min="0" max="100" value="0">
+                        <div class="timeline-markers" id="timelineMarkers"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Right Sidebar - Telemetry & Data -->
+            <aside class="sidebar sidebar-right" id="sidebarRight">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">Telemetry</h2>
+                    <select id="telemetryDriverSelect" class="driver-select">
+                        <option value="">Select Driver</option>
+                    </select>
+                </div>
+                
+                <div class="telemetry-panel" id="telemetryPanel">
+                    <!-- Speed Gauge -->
+                    <div class="telemetry-card" id="speedCard">
+                        <div class="telemetry-label">Speed</div>
+                        <div class="telemetry-value">
+                            <span id="speedValue" class="value-large">---</span>
+                            <span class="value-unit">km/h</span>
+                        </div>
+                        <div class="telemetry-bar">
+                            <div class="bar-fill speed-bar" id="speedBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Throttle -->
+                    <div class="telemetry-card" id="throttleCard">
+                        <div class="telemetry-label">Throttle</div>
+                        <div class="telemetry-value">
+                            <span id="throttleValue" class="value-large">---</span>
+                            <span class="value-unit">%</span>
+                        </div>
+                        <div class="telemetry-bar">
+                            <div class="bar-fill throttle-bar" id="throttleBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Brake -->
+                    <div class="telemetry-card" id="brakeCard">
+                        <div class="telemetry-label">Brake</div>
+                        <div class="telemetry-value">
+                            <span id="brakeValue" class="value-large">---</span>
+                            <span class="value-unit">%</span>
+                        </div>
+                        <div class="telemetry-bar">
+                            <div class="bar-fill brake-bar" id="brakeBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gear -->
+                    <div class="telemetry-card telemetry-card-small" id="gearCard">
+                        <div class="telemetry-label">Gear</div>
+                        <div class="gear-display" id="gearDisplay">N</div>
+                    </div>
+                    
+                    <!-- DRS -->
+                    <div class="telemetry-card telemetry-card-small" id="drsCard">
+                        <div class="telemetry-label">DRS</div>
+                        <div class="drs-indicator" id="drsIndicator">OFF</div>
+                    </div>
+                    
+                    <!-- RPM -->
+                    <div class="telemetry-card" id="rpmCard">
+                        <div class="telemetry-label">RPM</div>
+                        <div class="telemetry-value">
+                            <span id="rpmValue" class="value-large">---</span>
+                        </div>
+                        <div class="rpm-lights" id="rpmLights">
+                            <span class="rpm-light"></span>
+                            <span class="rpm-light"></span>
+                            <span class="rpm-light"></span>
+                            <span class="rpm-light"></span>
+                            <span class="rpm-light"></span>
+                            <span class="rpm-light"></span>
+                            <span class="rpm-light"></span>
+                            <span class="rpm-light"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lap Times Section -->
+                <div class="sidebar-section" id="lapTimesSection">
+                    <div class="section-header">
+                        <h3 class="section-title">Lap Times</h3>
+                    </div>
+                    <div class="lap-times-container" id="lapTimesContainer">
+                        <table class="lap-times-table">
+                            <thead>
+                                <tr>
+                                    <th>Lap</th>
+                                    <th>Time</th>
+                                    <th>S1</th>
+                                    <th>S2</th>
+                                    <th>S3</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lapTimesBody">
+                                <!-- Lap times will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </aside>
+            
+        </main>
+        
+        <!-- ============================================
+             Footer
+             ============================================ -->
+        <footer class="footer" id="footer">
+            <div class="footer-left">
+                <span class="footer-text">Data powered by FastF1</span>
+            </div>
+            <div class="footer-center">
+                <span class="footer-text" id="raceTime">--:--:--</span>
+            </div>
+            <div class="footer-right">
+                <span class="footer-text">© 2026 Aryan Raj</span>
+                <a href="https://github.com/ARYANRAJ1121" target="_blank" class="footer-link">GitHub</a>
+            </div>
+        </footer>
+        
+    </div>
+    
+    <!-- ================================================
+         Toast Notifications Container
+         ================================================ -->
+    <div id="toastContainer" class="toast-container"></div>
+    
+    <!-- ================================================
+         Modal Container (for popups)
+         ================================================ -->
+    <div id="modalOverlay" class="modal-overlay hidden">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Modal Title</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Modal content inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- ================================================
+         JavaScript Files
+         ================================================ -->
+    <!-- API Communication -->
+    <script src="js/api.js"></script>
+    
+    <!-- Track Visualization -->
+    <script src="js/trackRenderer.js"></script>
+    
+    <!-- Telemetry Display -->
+    <script src="js/telemetry.js"></script>
+    
+    <!-- Utilities -->
+    <script src="js/utils.js"></script>
+    
+    <!-- Main Application -->
+    <script src="js/app.js"></script>
+    
+</body>
+</html>
