@@ -15,6 +15,9 @@ from typing import Optional, List
 from datetime import datetime
 import logging
 
+# Import F1 Data Service
+from services import f1_data_service
+
 # Configure logging for debugging and monitoring
 logging.basicConfig(
     level=logging.INFO,
@@ -83,13 +86,17 @@ async def startup_event():
     - Pre-load commonly used data
     - Set up any required resources
     """
-    logger.info("🏎️ F1 Race Replay API Starting...")
-    logger.info("📦 Initializing FastF1 cache...")
+    logger.info("F1 Race Replay API Starting...")
+    logger.info("Initializing FastF1 cache...")
     
-    # FastF1 cache will be initialized in the service layer
-    # This keeps the main.py clean and focused on routing
+    # Initialize FastF1 cache from the service layer
+    cache_initialized = f1_data_service.initialize_cache()
+    if cache_initialized:
+        logger.info("FastF1 cache initialized successfully!")
+    else:
+        logger.warning("FastF1 cache initialization failed - data fetching may be slower")
     
-    logger.info("✅ API Server Ready!")
+    logger.info("API Server Ready!")
 
 
 @app.on_event("shutdown")
@@ -158,15 +165,7 @@ async def get_available_seasons():
     Returns:
         dict: List of available seasons with metadata
     """
-    # FastF1 has reliable data from 2018 onwards
-    current_year = datetime.now().year
-    seasons = list(range(2018, current_year + 1))
-    
-    return {
-        "seasons": seasons,
-        "recommended": seasons[-3:],  # Last 3 seasons recommended
-        "note": "Full telemetry available from 2018 onwards"
-    }
+    return f1_data_service.get_available_seasons()
 
 
 @app.get("/api/races/{season}", tags=["Races"])
@@ -192,14 +191,16 @@ async def get_races_in_season(
             detail=f"Season must be between 2018 and {current_year}"
         )
     
-    # This will be replaced with actual FastF1 data in the service layer
-    # For now, returning a placeholder structure
-    return {
-        "season": season,
-        "message": "Race schedule will be loaded from FastF1 service",
-        "races": [],  # Will be populated by f1_data_service
-        "total_races": 0
-    }
+    # Get real race schedule from F1 data service
+    result = f1_data_service.get_race_schedule(season)
+    
+    if result.get("status") == "error":
+        raise HTTPException(
+            status_code=500,
+            detail=result.get("error_message", "Failed to fetch race schedule")
+        )
+    
+    return result
 
 
 # ============================================
@@ -239,12 +240,28 @@ async def get_session_data(
             detail=f"Invalid session type. Must be one of: {', '.join(valid_sessions)}"
         )
     
+    # Load session from F1 data service
+    session, error = f1_data_service.load_session(
+        season, race_round, session_type_upper,
+        load_laps=True, load_telemetry=False
+    )
+    
+    if error:
+        raise HTTPException(status_code=500, detail=error)
+    
+    # Get session info and results
+    session_info = f1_data_service.get_session_info(session)
+    results = f1_data_service.get_session_results(session)
+    drivers = f1_data_service.get_driver_info(session)
+    
     return {
         "season": season,
         "round": race_round,
         "session_type": session_type_upper,
-        "message": "Session data will be loaded from FastF1 service",
-        "data": None  # Will be populated by f1_data_service
+        "info": session_info,
+        "results": results,
+        "drivers": drivers,
+        "status": "success"
     }
 
 
@@ -257,7 +274,8 @@ async def get_lap_data(
     season: int,
     race_round: int,
     session_type: str,
-    driver: Optional[str] = Query(None, description="Driver code (e.g., VER, HAM)")
+    driver: Optional[str] = Query(None, description="Driver code (e.g., VER, HAM)"),
+    fastest_only: bool = Query(False, description="Return only fastest laps")
 ):
     """
     Get lap-by-lap data for a session.
@@ -267,17 +285,35 @@ async def get_lap_data(
         race_round: Race round number
         session_type: Session type (FP1, FP2, FP3, Q, S, R)
         driver: Optional driver code to filter laps
+        fastest_only: If true, return only fastest laps
     
     Returns:
         dict: Lap times, sectors, and positions for each lap
     """
+    # Load session
+    session, error = f1_data_service.load_session(
+        season, race_round, session_type.upper(),
+        load_laps=True, load_telemetry=False
+    )
+    
+    if error:
+        raise HTTPException(status_code=500, detail=error)
+    
+    # Get lap data
+    if fastest_only:
+        laps = f1_data_service.get_fastest_laps(session, top_n=20)
+    else:
+        laps = f1_data_service.get_all_laps(session, driver_code=driver)
+    
     return {
         "season": season,
         "round": race_round,
-        "session_type": session_type,
+        "session_type": session_type.upper(),
         "driver_filter": driver,
-        "message": "Lap data will be loaded from FastF1 service",
-        "laps": []  # Will be populated by f1_data_service
+        "fastest_only": fastest_only,
+        "laps": laps,
+        "total_laps": len(laps),
+        "status": "success"
     }
 
 
@@ -315,14 +351,26 @@ async def get_driver_telemetry(
     Returns:
         dict: High-frequency telemetry data
     """
+    # Load session with telemetry
+    session, error = f1_data_service.load_session(
+        season, race_round, session_type.upper(),
+        load_laps=True, load_telemetry=True
+    )
+    
+    if error:
+        raise HTTPException(status_code=500, detail=error)
+    
+    # Get telemetry data
+    telemetry = f1_data_service.get_lap_telemetry(session, driver.upper(), lap_number)
+    
+    if telemetry.get("status") == "error":
+        raise HTTPException(status_code=400, detail=telemetry.get("error", "Failed to get telemetry"))
+    
     return {
         "season": season,
         "round": race_round,
-        "session_type": session_type,
-        "driver": driver.upper(),
-        "lap_number": lap_number,
-        "message": "Telemetry data will be loaded from FastF1 service",
-        "telemetry": []  # Will be populated by f1_data_service
+        "session_type": session_type.upper(),
+        **telemetry
     }
 
 
@@ -333,7 +381,8 @@ async def get_driver_telemetry(
 @app.get("/api/track/{season}/{race_round}", tags=["Track"])
 async def get_track_data(
     season: int,
-    race_round: int
+    race_round: int,
+    session_type: str = Query("R", description="Session to get track from (default: Race)")
 ):
     """
     Get track/circuit data including layout coordinates.
@@ -344,21 +393,33 @@ async def get_track_data(
     Args:
         season: The F1 season year
         race_round: Race round number
+        session_type: Session type to extract track from
     
     Returns:
         dict: Track layout, corner positions, sector markers
     """
+    # Load session with telemetry for track coordinates
+    session, error = f1_data_service.load_session(
+        season, race_round, session_type.upper(),
+        load_laps=True, load_telemetry=True
+    )
+    
+    if error:
+        raise HTTPException(status_code=500, detail=error)
+    
+    # Get track coordinates
+    track_data = f1_data_service.get_track_coordinates(session)
+    
+    if track_data.get("status") == "error":
+        raise HTTPException(
+            status_code=400, 
+            detail=track_data.get("error", "Failed to get track data")
+        )
+    
     return {
         "season": season,
         "round": race_round,
-        "message": "Track data will be loaded from FastF1 service",
-        "track": {
-            "name": "",
-            "country": "",
-            "coordinates": [],  # Track outline coordinates
-            "corners": [],      # Corner positions
-            "sectors": []       # Sector boundaries
-        }
+        **track_data
     }
 
 
@@ -367,20 +428,42 @@ async def get_track_data(
 # ============================================
 
 @app.get("/api/drivers/{season}", tags=["Drivers"])
-async def get_season_drivers(season: int):
+async def get_season_drivers(
+    season: int,
+    race_round: int = Query(1, description="Race round to get drivers from")
+):
     """
     Get all drivers participating in a season.
     
     Args:
         season: The F1 season year
+        race_round: Race round to get driver list from
     
     Returns:
         dict: List of drivers with their teams and numbers
     """
+    # Load a session to get driver info
+    session, error = f1_data_service.load_session(
+        season, race_round, "R",
+        load_laps=True, load_telemetry=False
+    )
+    
+    if error:
+        # Try qualifying if race not available
+        session, error = f1_data_service.load_session(
+            season, race_round, "Q",
+            load_laps=True, load_telemetry=False
+        )
+        if error:
+            raise HTTPException(status_code=500, detail=error)
+    
+    drivers = f1_data_service.get_driver_info(session)
+    
     return {
         "season": season,
-        "message": "Driver data will be loaded from FastF1 service",
-        "drivers": []  # Will be populated by f1_data_service
+        "drivers": drivers,
+        "total_drivers": len(drivers),
+        "status": "success"
     }
 
 

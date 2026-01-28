@@ -1,0 +1,55 @@
+# F1 Race Replay - Git Ignore File
+# ================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environment
+venv/
+.venv/
+ENV/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# FastF1 Cache (large data files)
+cache/
+*.sqlite
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment Variables
+.env
+.env.local
+*.env
+
+# Node (for frontend)
+node_modules/
+npm-debug.log
+
+# Build outputs
+*.exe
+*.dll
