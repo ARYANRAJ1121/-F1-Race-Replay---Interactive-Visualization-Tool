@@ -8,7 +8,7 @@ Author: Aryan Raj
 Created: 2026-01-28
 """
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Path
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from typing import Optional, List
@@ -210,10 +210,9 @@ async def get_races_in_season(
 async def get_session_data(
     season: int,
     race_round: int,
-    session_type: str = Query(
+    session_type: str = Path(
         ...,
-        description="Session type: FP1, FP2, FP3, Q, S, R",
-        regex="^(FP1|FP2|FP3|Q|S|R)$"
+        description="Session type: FP1, FP2, FP3, Q, S, R"
     )
 ):
     """
@@ -231,10 +230,19 @@ async def get_session_data(
     Returns:
         dict: Session data including drivers, laps, and results
     """
+    # Validate session type
+    valid_sessions = ["FP1", "FP2", "FP3", "Q", "S", "R"]
+    session_type_upper = session_type.upper()
+    if session_type_upper not in valid_sessions:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid session type. Must be one of: {', '.join(valid_sessions)}"
+        )
+    
     return {
         "season": season,
         "round": race_round,
-        "session_type": session_type,
+        "session_type": session_type_upper,
         "message": "Session data will be loaded from FastF1 service",
         "data": None  # Will be populated by f1_data_service
     }
