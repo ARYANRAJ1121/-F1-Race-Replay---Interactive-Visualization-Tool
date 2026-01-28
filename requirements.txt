@@ -1,0 +1,42 @@
+# F1 Race Replay - Interactive Visualization Tool
+# Python Dependencies
+# ====================================
+
+# Core F1 Data Library
+# FastF1 provides access to F1 timing data, telemetry, and session information
+# Uses Ergast API and official F1 timing data
+fastf1==3.3.0
+
+# Web Framework
+# FastAPI is a modern, fast (high-performance) web framework for building APIs
+# Based on standard Python type hints
+fastapi==0.109.2
+
+# ASGI Server
+# Uvicorn is a lightning-fast ASGI server implementation
+# Required to run FastAPI applications
+uvicorn[standard]==0.27.1
+
+# Data Processing
+# Pandas for data manipulation and analysis
+# NumPy for numerical computations
+pandas==2.2.0
+numpy==1.26.4
+
+# HTTP Client
+# For making external API requests if needed
+httpx==0.26.0
+
+# CORS Middleware Support
+# Already included in FastAPI, but explicit for clarity
+
+# Caching
+# For caching F1 data to avoid repeated API calls
+diskcache==5.6.3
+
+# Type Validation
+# Pydantic for data validation (comes with FastAPI)
+pydantic==2.6.1
+
+# Date/Time Handling
+python-dateutil==2.8.2
