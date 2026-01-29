@@ -629,27 +629,30 @@ function updateDriverList(drivers) {
     // Create driver cards
     drivers.forEach((driver, index) => {
         const teamColor = driver.color || getTeamColor(driver.team);
+        const driverCode = driver.code || driver.driver_code;
 
-        const card = createElement('div', {
-            className: 'driver-card',
-            'data-driver': driver.code || driver.driver_code,
-            style: { '--team-color': teamColor },
-            onClick: () => {
-                // Select this driver
-                document.querySelectorAll('.driver-card').forEach(c => c.classList.remove('active'));
-                card.classList.add('active');
+        const card = document.createElement('div');
+        card.className = 'driver-card';
+        card.dataset.driver = driverCode;
+        card.style.setProperty('--team-color', teamColor);
 
-                AppState.telemetryManager.setSelectedDriver(driver.code || driver.driver_code);
-                loadDriverTelemetry(driver.code || driver.driver_code);
-            }
-        }, `
+        card.innerHTML = `
             <span class="driver-position">${driver.position || index + 1}</span>
             <div class="driver-info">
-                <div class="driver-name">${driver.name || driver.full_name || driver.code}</div>
+                <div class="driver-name">${driver.name || driver.full_name || driverCode}</div>
                 <div class="driver-team">${driver.team || driver.team_name || ''}</div>
             </div>
             <span class="driver-time">${formatLapTimeDisplay(driver.time || driver.fastest_lap) || ''}</span>
-        `);
+        `;
+
+        card.addEventListener('click', () => {
+            // Select this driver
+            document.querySelectorAll('.driver-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+
+            AppState.telemetryManager.setSelectedDriver(driverCode);
+            loadDriverTelemetry(driverCode);
+        });
 
         driverList.appendChild(card);
     });
@@ -661,12 +664,15 @@ function updateDriverList(drivers) {
 
 window.addEventListener('error', (event) => {
     console.error('Unhandled error:', event.error);
-    showError('An unexpected error occurred');
+    // Only show toast for significant errors
+    if (event.error && event.error.message && !event.error.message.includes('Script error')) {
+        // showError('An unexpected error occurred');
+    }
 });
 
 window.addEventListener('unhandledrejection', (event) => {
     console.error('Unhandled promise rejection:', event.reason);
-    showError('An unexpected error occurred');
+    // Suppress generic error toasts - specific handlers will show appropriate messages
 });
 
 // ============================================
