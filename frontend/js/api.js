@@ -17,7 +17,7 @@
  * Base URL for the API backend.
  * Change this when deploying to production.
  */
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'http://127.0.0.1:8080';
 
 /**
  * Default request timeout in milliseconds
@@ -42,7 +42,7 @@ class F1ApiClient {
      */
     async request(endpoint, options = {}) {
         const url = `${this.baseUrl}${endpoint}`;
-        
+
         const defaultOptions = {
             method: 'GET',
             headers: {
@@ -180,7 +180,7 @@ class F1ApiClient {
      */
     async getLaps(season, raceRound, sessionType, options = {}) {
         const params = new URLSearchParams();
-        
+
         if (options.driver) {
             params.append('driver', options.driver);
         }
@@ -190,7 +190,7 @@ class F1ApiClient {
 
         const queryString = params.toString();
         const endpoint = `/api/laps/${season}/${raceRound}/${sessionType}${queryString ? '?' + queryString : ''}`;
-        
+
         return this.request(endpoint);
     }
 
@@ -220,11 +220,11 @@ class F1ApiClient {
      */
     async getTelemetry(season, raceRound, sessionType, driver, lapNumber = null) {
         let endpoint = `/api/telemetry/${season}/${raceRound}/${sessionType}/${driver}`;
-        
+
         if (lapNumber !== null) {
             endpoint += `?lap_number=${lapNumber}`;
         }
-        
+
         return this.request(endpoint);
     }
 
@@ -338,12 +338,12 @@ function formatLapTime(lapTime) {
     if (!lapTime || lapTime === 'None' || lapTime === 'null') {
         return '--:--.---';
     }
-    
+
     // If already formatted, return as is
     if (typeof lapTime === 'string' && lapTime.includes(':')) {
         return lapTime;
     }
-    
+
     // Handle timedelta format (0 days 00:01:23.456000)
     const match = lapTime.match(/(\d+):(\d+):(\d+\.?\d*)/);
     if (match) {
@@ -352,7 +352,7 @@ function formatLapTime(lapTime) {
         const seconds = parseFloat(match[3]).toFixed(3);
         return `${minutes}:${seconds.padStart(6, '0')}`;
     }
-    
+
     return lapTime;
 }
 
@@ -365,14 +365,14 @@ function formatSectorTime(sectorTime) {
     if (!sectorTime || sectorTime === 'None' || sectorTime === 'null') {
         return '--.---';
     }
-    
+
     // Handle timedelta format
     const match = sectorTime.match(/(\d+):(\d+\.?\d*)/);
     if (match) {
         const seconds = parseFloat(match[2]).toFixed(3);
         return seconds;
     }
-    
+
     return sectorTime;
 }
 
@@ -399,14 +399,14 @@ function getTeamColor(teamName) {
         'RB': '#6692FF',
         'Racing Bulls': '#6692FF',
     };
-    
+
     // Try to find a match
     for (const [key, color] of Object.entries(teamColors)) {
         if (teamName && teamName.toLowerCase().includes(key.toLowerCase())) {
             return color;
         }
     }
-    
+
     return '#888888'; // Default gray
 }
 
