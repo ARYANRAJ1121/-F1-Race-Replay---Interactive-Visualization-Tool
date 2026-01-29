@@ -483,8 +483,12 @@ async function loadSession() {
             hideElement('emptyState');
 
             // Position cars on track based on results
-            if (sessionData.drivers && trackData.x && trackData.y) {
-                positionCarsOnTrack(sessionData.drivers, trackData);
+            // Handle nested coordinates format
+            const xCoords = trackData.coordinates?.x || trackData.x;
+            const yCoords = trackData.coordinates?.y || trackData.y;
+
+            if (sessionData.drivers && xCoords && yCoords) {
+                positionCarsOnTrack(sessionData.drivers, xCoords, yCoords);
             }
 
         } catch (trackError) {
@@ -507,13 +511,14 @@ async function loadSession() {
 /**
  * Position cars on track for initial display
  * @param {Array} drivers 
- * @param {Object} trackData 
+ * @param {Array} xCoords - X coordinates array
+ * @param {Array} yCoords - Y coordinates array
  */
-function positionCarsOnTrack(drivers, trackData) {
-    if (!trackData.x || !trackData.y || trackData.x.length === 0) return;
+function positionCarsOnTrack(drivers, xCoords, yCoords) {
+    if (!xCoords || !yCoords || xCoords.length === 0) return;
 
     const positions = [];
-    const trackLength = trackData.x.length;
+    const trackLength = xCoords.length;
 
     drivers.forEach((driver, index) => {
         // Spread cars along the track based on position
@@ -521,8 +526,8 @@ function positionCarsOnTrack(drivers, trackData) {
 
         positions.push({
             driver: driver.code || driver.driver_code,
-            x: trackData.x[pointIndex] || trackData.x[0],
-            y: trackData.y[pointIndex] || trackData.y[0],
+            x: xCoords[pointIndex] || xCoords[0],
+            y: yCoords[pointIndex] || yCoords[0],
             color: driver.color || getTeamColor(driver.team),
             name: driver.name || driver.full_name,
             team: driver.team || driver.team_name,

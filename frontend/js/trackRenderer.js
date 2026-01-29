@@ -150,16 +150,24 @@ class TrackRenderer {
     loadTrack(data) {
         this.trackData = data;
 
-        if (data.x && data.y) {
-            // Combine x and y arrays into coordinate pairs
+        // Handle different data formats from the API
+        if (data.coordinates && data.coordinates.x && data.coordinates.y) {
+            // Format: { coordinates: { x: [...], y: [...] } }
+            this.trackCoordinates = data.coordinates.x.map((x, i) => ({
+                x: x,
+                y: data.coordinates.y[i]
+            }));
+        } else if (data.x && data.y) {
+            // Format: { x: [...], y: [...] }
             this.trackCoordinates = data.x.map((x, i) => ({
                 x: x,
                 y: data.y[i]
             }));
-        } else if (data.coordinates) {
+        } else if (Array.isArray(data.coordinates)) {
+            // Format: { coordinates: [{ x, y }, ...] }
             this.trackCoordinates = data.coordinates;
         } else {
-            console.error('Invalid track data format');
+            console.error('Invalid track data format:', data);
             return;
         }
 
