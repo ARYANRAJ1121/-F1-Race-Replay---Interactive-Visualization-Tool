@@ -208,12 +208,14 @@ function setupEventListeners() {
         });
     }
 
-    // Speed slider
+    // Speed slider - controls race replay speed
     const speedSlider = $('speedSlider');
     const speedValue = $('speedValue');
     if (speedSlider) {
         speedSlider.addEventListener('input', (e) => {
             const speed = parseFloat(e.target.value);
+            // Update both track renderer and telemetry speed
+            AppState.trackRenderer.setPlaybackSpeed(speed);
             AppState.telemetryManager.setPlaybackSpeed(speed);
             if (speedValue) speedValue.textContent = `${speed}x`;
         });
@@ -288,21 +290,25 @@ function setupPlaybackControls() {
 }
 
 /**
- * Toggle playback
+ * Toggle playback - Controls race replay for all cars and syncs telemetry
  */
 function togglePlayback() {
-    const isPlaying = AppState.telemetryManager.togglePlayback((pos, progress) => {
-        // Update timeline
-        updateTimelineSlider(progress * 100);
+    // Determine target state based on current state (toggle)
+    const targetState = !AppState.isPlaying;
+    AppState.isPlaying = targetState;
 
-        // Update car position on track
-        if (AppState.trackRenderer.selectedCar) {
-            AppState.trackRenderer.updateCar(AppState.trackRenderer.selectedCar, pos.x, pos.y);
-            AppState.trackRenderer.render();
-        }
-    });
+    // 1. Control Track Renderer (Race Replay)
+    if (targetState) {
+        AppState.trackRenderer.startAnimation();
+    } else {
+        AppState.trackRenderer.stopAnimation();
+    }
 
-    AppState.isPlaying = isPlaying;
+    // 2. Control Telemetry Manager
+    // We stop the autonomous telemetry loop to prevent it from running independently
+    // The TrackRenderer will drive the telemetry updates during the race animation
+    AppState.telemetryManager.stopPlayback();
+
     updatePlayPauseButton();
 }
 
@@ -479,16 +485,40 @@ async function loadSession() {
                 AppState.sessionType
             );
 
+            // Add track/circuit name to track data from session info
+            trackData.track_name = sessionData.info?.event_name ||
+                sessionData.info?.circuit_name ||
+                trackData.track_name ||
+                trackData.circuit ||
+                'Circuit';
+
             AppState.trackRenderer.loadTrack(trackData);
+
+            // Set total laps from session info
+            if (sessionData.info?.total_laps) {
+                AppState.trackRenderer.setTotalLaps(sessionData.info.total_laps);
+            }
+
             hideElement('emptyState');
 
-            // Position cars on track based on results
-            // Handle nested coordinates format
-            const xCoords = trackData.coordinates?.x || trackData.x;
-            const yCoords = trackData.coordinates?.y || trackData.y;
+            // Start race replay with ALL cars moving together!
+            if (sessionData.drivers && sessionData.drivers.length > 0) {
+                // Prepare driver data for race replay
+                const driversForReplay = sessionData.drivers.map((driver, index) => ({
+                    driver_code: driver.code || driver.driver_code,
+                    code: driver.code || driver.driver_code,
+                    full_name: driver.name || driver.full_name,
+                    name: driver.name || driver.full_name,
+                    team: driver.team || driver.team_name,
+                    team_color: driver.color || getTeamColor(driver.team),
+                    color: driver.color || getTeamColor(driver.team),
+                    position: driver.position || index + 1
+                }));
 
-            if (sessionData.drivers && xCoords && yCoords) {
-                positionCarsOnTrack(sessionData.drivers, xCoords, yCoords);
+                // Start the race replay animation with all cars!
+                AppState.trackRenderer.startRaceReplay(driversForReplay);
+
+                showInfo('🏎️ Race replay started! Click on any car to view telemetry.');
             }
 
         } catch (trackError) {
