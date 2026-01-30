@@ -36,33 +36,50 @@ Whether you're a data analyst, F1 enthusiast, or aspiring motorsport engineer, t
 ## ✨ Features
 
 ### 🏁 Race Data
+
 - View complete race schedules from 2018-2026
 - Access all session types (FP1, FP2, FP3, Qualifying, Sprint, Race)
 - Get detailed session results with driver standings
 
 ### 📊 Telemetry & Analytics
+
 - **Speed Data**: Real-time speed visualization up to 370+ km/h
 - **Throttle & Brake**: Pedal input analysis throughout laps
-- **Gear Changes**: Visualize gear shifts across the track
+- **Gear Changes**: Visualize gear shifts across the track (1-8 gears)
 - **DRS Detection**: See when DRS is activated
+- **RPM Display**: Engine RPM with visual light indicators
 - **Sector Times**: Compare performance across track sectors
 
 ### 🛣️ Track Visualization
+
 - Canvas-based track rendering using GPS telemetry coordinates
-- Car position tracking for race replay
-- Support for all F1 circuits
+- Real-time car position tracking for race replay
+- Support for all 24 F1 circuits worldwide
+- Interactive car selection with hover effects
+- Team-colored car markers
 
 ### 👥 Driver Information
-- Complete driver lineup for each season
-- Team colors and livery representation
-- Driver performance comparison
+
+- Complete driver lineup for each season (20 drivers)
+- Team colors matching official F1 liveries
+- Position-based sorting and display
+- Click to select and view telemetry
+
+### 🎮 Playback Controls
+
+- Play/Pause race replay
+- Adjustable playback speed (0.25x - 4x)
+- Timeline scrubbing
+- Lap-by-lap navigation
 
 ---
 
 ## 🖥️ Demo
 
 ### API Documentation (Swagger UI)
+
 Once the server is running, access the interactive API documentation at:
+
 ```
 http://127.0.0.1:8080/docs
 ```
@@ -70,6 +87,7 @@ http://127.0.0.1:8080/docs
 ### Sample API Responses
 
 **Get Available Seasons:**
+
 ```json
 {
   "seasons": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
@@ -80,6 +98,7 @@ http://127.0.0.1:8080/docs
 ```
 
 **Get Race Schedule:**
+
 ```json
 {
   "season": 2024,
@@ -97,30 +116,35 @@ http://127.0.0.1:8080/docs
 ## 🚀 Installation
 
 ### Prerequisites
+
 - Python 3.10 or higher
 - pip (Python package manager)
 - Git
 
 ### Step 1: Clone the Repository
+
 ```bash
 git clone https://github.com/ARYANRAJ1121/-F1-Race-Replay---Interactive-Visualization-Tool.git
 cd -F1-Race-Replay---Interactive-Visualization-Tool
 ```
 
 ### Step 2: Install Python Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### Step 3: Start the Backend Server
+
 ```bash
 cd backend
 python -m uvicorn main:app --reload --port 8080
 ```
 
 ### Step 4: Access the Application
-- **API Documentation**: http://127.0.0.1:8080/docs
-- **Health Check**: http://127.0.0.1:8080/health
+
+- **API Documentation**: <http://127.0.0.1:8080/docs>
+- **Health Check**: <http://127.0.0.1:8080/health>
 
 ---
 
@@ -152,6 +176,7 @@ python -m uvicorn main:app --reload --port 8080
 ## 🛠️ Tech Stack
 
 ### Backend
+
 | Technology | Purpose |
 |------------|---------|
 | **Python 3.10+** | Core programming language |
@@ -162,6 +187,7 @@ python -m uvicorn main:app --reload --port 8080
 | **NumPy** | Numerical computations |
 
 ### Frontend
+
 | Technology | Purpose |
 |------------|---------|
 | **HTML5** | Semantic markup structure |
@@ -170,6 +196,7 @@ python -m uvicorn main:app --reload --port 8080
 | **Canvas API** | Track and car visualization |
 
 ### Data Source
+
 - **FastF1 Library**: Connects to official F1 timing data
 - **Ergast API**: Historical race data
 - **Cached locally**: Faster subsequent requests
@@ -191,7 +218,11 @@ F1-Race-Replay/
 │   ├── css/
 │   │   └── styles.css          # Dark theme styling
 │   └── js/
-│       └── api.js              # API communication layer
+│       ├── api.js              # API communication layer
+│       ├── utils.js            # Utility functions & helpers
+│       ├── trackRenderer.js    # Canvas track visualization
+│       ├── telemetry.js        # Telemetry display handler
+│       └── app.js              # Main application logic
 ├── cache/
 │   └── fastf1/                 # Cached F1 data
 ├── requirements.txt            # Python dependencies
@@ -204,6 +235,7 @@ F1-Race-Replay/
 ## 🔧 Configuration
 
 ### Environment Variables (Optional)
+
 ```bash
 # API Configuration
 API_HOST=127.0.0.1
@@ -214,7 +246,9 @@ FASTF1_CACHE_DIR=./cache/fastf1
 ```
 
 ### Changing the API Port
+
 If port 8080 is in use, start with a different port:
+
 ```bash
 python -m uvicorn main:app --reload --port 9000
 ```
@@ -223,19 +257,30 @@ python -m uvicorn main:app --reload --port 9000
 
 ## 🗺️ Roadmap
 
+### ✅ Completed Features
+
 - [x] Backend API with FastF1 integration
 - [x] Season and race schedule endpoints
-- [x] Session data with results
-- [x] Telemetry data extraction
-- [x] Track coordinates extraction
-- [x] Frontend HTML structure
-- [x] Dark theme CSS styling
-- [x] API communication layer
-- [ ] Track canvas visualization
-- [ ] Race replay with car positions
-- [ ] Real-time telemetry display
-- [ ] Driver comparison tools
+- [x] Session data with driver results
+- [x] Telemetry data extraction (speed, throttle, brake, gear, DRS, RPM)
+- [x] Track coordinates extraction from GPS data
+- [x] Frontend HTML structure with responsive layout
+- [x] Dark theme CSS styling with glassmorphism effects
+- [x] API communication layer with error handling
+- [x] Track canvas visualization with team colors
+- [x] Race replay with car positions on track
+- [x] Real-time telemetry display with animated bars
+- [x] Interactive driver selection
+- [x] Playback controls (play/pause, speed, timeline)
+
+### 🔮 Future Enhancements
+
+- [ ] Driver comparison mode (side-by-side telemetry)
 - [ ] Lap time analysis charts
+- [ ] Sector-by-sector breakdown
+- [ ] Race strategy timeline
+- [ ] Weather data integration
+- [ ] Multi-language support
 
 ---
 
@@ -260,6 +305,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **Aryan Raj**
+
 - GitHub: [@ARYANRAJ1121](https://github.com/ARYANRAJ1121)
 
 ---
