@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <!-- ================================================
          F1 Race Replay - Interactive Visualization Tool
@@ -10,37 +11,43 @@
          Author: Aryan Raj
          Created: 2026-01-28
     -->
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="F1 Race Replay - Interactive Formula 1 race visualization and data analysis tool. View telemetry, lap times, and race positions.">
+    <meta name="description"
+        content="F1 Race Replay - Interactive Formula 1 race visualization and data analysis tool. View telemetry, lap times, and race positions.">
     <meta name="keywords" content="F1, Formula 1, Race Replay, Telemetry, Visualization, Racing, Data Analysis">
     <meta name="author" content="Aryan Raj">
-    
+
     <!-- Open Graph Meta Tags for Social Sharing -->
     <meta property="og:title" content="F1 Race Replay - Interactive Visualization Tool">
-    <meta property="og:description" content="Visualize Formula 1 races with real telemetry data, lap times, and driver positions.">
+    <meta property="og:description"
+        content="Visualize Formula 1 races with real telemetry data, lap times, and driver positions.">
     <meta property="og:type" content="website">
-    
+
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
-    
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
+
     <!-- Google Fonts - Inter for modern typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="css/styles.css">
-    
+
     <title>F1 Race Replay | Interactive Visualization Tool</title>
 </head>
+
 <body>
     <!-- ================================================
          Application Container
          ================================================ -->
     <div id="app" class="app-container">
-        
+
         <!-- ============================================
              Header / Top Navigation Bar
              ============================================ -->
@@ -51,7 +58,7 @@
                     <h1 class="logo-text">F1 Race Replay</h1>
                 </div>
             </div>
-            
+
             <div class="header-center">
                 <!-- Race Selection Controls -->
                 <div class="race-selector" id="raceSelector">
@@ -61,14 +68,14 @@
                             <option value="">Loading...</option>
                         </select>
                     </div>
-                    
+
                     <div class="selector-group">
                         <label for="raceSelect" class="selector-label">Race</label>
                         <select id="raceSelect" class="selector-dropdown" disabled>
                             <option value="">Select Season First</option>
                         </select>
                     </div>
-                    
+
                     <div class="selector-group">
                         <label for="sessionSelect" class="selector-label">Session</label>
                         <select id="sessionSelect" class="selector-dropdown" disabled>
@@ -80,14 +87,14 @@
                             <option value="FP1">FP1</option>
                         </select>
                     </div>
-                    
+
                     <button id="loadSessionBtn" class="btn btn-primary" disabled>
                         <span class="btn-icon">▶</span>
                         Load Session
                     </button>
                 </div>
             </div>
-            
+
             <div class="header-right">
                 <div class="status-indicator" id="statusIndicator">
                     <span class="status-dot"></span>
@@ -95,19 +102,19 @@
                 </div>
             </div>
         </header>
-        
+
         <!-- ============================================
              Main Content Area
              ============================================ -->
         <main class="main-content" id="mainContent">
-            
+
             <!-- Left Sidebar - Driver List & Standings -->
             <aside class="sidebar sidebar-left" id="sidebarLeft">
                 <div class="sidebar-header">
                     <h2 class="sidebar-title">Drivers</h2>
                     <span class="driver-count" id="driverCount">0 drivers</span>
                 </div>
-                
+
                 <div class="driver-list" id="driverList">
                     <!-- Driver cards will be dynamically inserted here -->
                     <div class="placeholder-message">
@@ -115,7 +122,7 @@
                         <p>Load a session to see drivers</p>
                     </div>
                 </div>
-                
+
                 <div class="sidebar-footer">
                     <div class="legend">
                         <h3 class="legend-title">Tyre Compounds</h3>
@@ -129,7 +136,7 @@
                     </div>
                 </div>
             </aside>
-            
+
             <!-- Center - Track Visualization -->
             <section class="track-section" id="trackSection">
                 <!-- Track Info Banner -->
@@ -144,17 +151,17 @@
                         <span class="total-laps"><span id="totalLaps">--</span></span>
                     </div>
                 </div>
-                
+
                 <!-- Canvas Container for Track Rendering -->
                 <div class="track-canvas-container" id="trackCanvasContainer">
                     <canvas id="trackCanvas" class="track-canvas"></canvas>
-                    
+
                     <!-- Overlay for loading state -->
                     <div class="canvas-overlay" id="canvasOverlay">
                         <div class="loading-spinner"></div>
                         <p class="loading-text">Loading track data...</p>
                     </div>
-                    
+
                     <!-- Empty state -->
                     <div class="empty-state" id="emptyState">
                         <div class="empty-icon">🏁</div>
@@ -162,7 +169,7 @@
                         <p>Select a season and race from the top menu to begin visualization</p>
                     </div>
                 </div>
-                
+
                 <!-- Playback Controls -->
                 <div class="playback-controls" id="playbackControls">
                     <div class="playback-buttons">
@@ -182,20 +189,20 @@
                             <span>⏭</span>
                         </button>
                     </div>
-                    
+
                     <div class="speed-control">
                         <label for="speedSlider">Speed:</label>
                         <input type="range" id="speedSlider" min="0.25" max="4" step="0.25" value="1">
                         <span id="speedValue">1x</span>
                     </div>
-                    
+
                     <div class="timeline-container">
                         <input type="range" id="timelineSlider" class="timeline-slider" min="0" max="100" value="0">
                         <div class="timeline-markers" id="timelineMarkers"></div>
                     </div>
                 </div>
             </section>
-            
+
             <!-- Right Sidebar - Telemetry & Data -->
             <aside class="sidebar sidebar-right" id="sidebarRight">
                 <div class="sidebar-header">
@@ -204,7 +211,7 @@
                         <option value="">Select Driver</option>
                     </select>
                 </div>
-                
+
                 <div class="telemetry-panel" id="telemetryPanel">
                     <!-- Speed Gauge -->
                     <div class="telemetry-card" id="speedCard">
@@ -217,7 +224,7 @@
                             <div class="bar-fill speed-bar" id="speedBar" style="width: 0%"></div>
                         </div>
                     </div>
-                    
+
                     <!-- Throttle -->
                     <div class="telemetry-card" id="throttleCard">
                         <div class="telemetry-label">Throttle</div>
@@ -229,7 +236,7 @@
                             <div class="bar-fill throttle-bar" id="throttleBar" style="width: 0%"></div>
                         </div>
                     </div>
-                    
+
                     <!-- Brake -->
                     <div class="telemetry-card" id="brakeCard">
                         <div class="telemetry-label">Brake</div>
@@ -241,19 +248,19 @@
                             <div class="bar-fill brake-bar" id="brakeBar" style="width: 0%"></div>
                         </div>
                     </div>
-                    
+
                     <!-- Gear -->
                     <div class="telemetry-card telemetry-card-small" id="gearCard">
                         <div class="telemetry-label">Gear</div>
                         <div class="gear-display" id="gearDisplay">N</div>
                     </div>
-                    
+
                     <!-- DRS -->
                     <div class="telemetry-card telemetry-card-small" id="drsCard">
                         <div class="telemetry-label">DRS</div>
                         <div class="drs-indicator" id="drsIndicator">OFF</div>
                     </div>
-                    
+
                     <!-- RPM -->
                     <div class="telemetry-card" id="rpmCard">
                         <div class="telemetry-label">RPM</div>
@@ -272,7 +279,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Lap Times Section -->
                 <div class="sidebar-section" id="lapTimesSection">
                     <div class="section-header">
@@ -296,9 +303,9 @@
                     </div>
                 </div>
             </aside>
-            
+
         </main>
-        
+
         <!-- ============================================
              Footer
              ============================================ -->
@@ -314,14 +321,14 @@
                 <a href="https://github.com/ARYANRAJ1121" target="_blank" class="footer-link">GitHub</a>
             </div>
         </footer>
-        
+
     </div>
-    
+
     <!-- ================================================
          Toast Notifications Container
          ================================================ -->
     <div id="toastContainer" class="toast-container"></div>
-    
+
     <!-- ================================================
          Modal Container (for popups)
          ================================================ -->
@@ -336,24 +343,30 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- ================================================
+         Toast Notifications Container
+         ================================================ -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <!-- ================================================
          JavaScript Files
          ================================================ -->
     <!-- API Communication -->
     <script src="js/api.js"></script>
-    
+
     <!-- Track Visualization -->
     <script src="js/trackRenderer.js"></script>
-    
+
     <!-- Telemetry Display -->
     <script src="js/telemetry.js"></script>
-    
+
     <!-- Utilities -->
     <script src="js/utils.js"></script>
-    
+
     <!-- Main Application -->
     <script src="js/app.js"></script>
-    
+
 </body>
+
 </html>
