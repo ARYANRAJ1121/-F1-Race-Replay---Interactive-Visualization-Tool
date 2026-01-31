@@ -1712,3 +1712,85 @@ input:checked+.slider:before {
     height: 6px;
     width: 10%;
 }
+
+/* ================================================
+   Center Panel & Analysis Charts
+   ================================================ */
+
+.center-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    /* Ensure it takes the space previously held by trackSection in grid */
+    min-width: 0;
+}
+
+.view-tabs {
+    display: flex;
+    gap: 1px;
+    background: var(--color-bg-tertiary);
+    border-bottom: 1px solid var(--glass-border);
+    flex-shrink: 0;
+    /* Keep height fixed */
+}
+
+.view-tab {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.view-tab:hover {
+    color: var(--text-primary);
+    background: var(--color-bg-hover);
+}
+
+.view-tab.active {
+    color: var(--neon-cyan);
+    background: var(--color-bg-secondary);
+    border-bottom: 2px solid var(--neon-cyan);
+}
+
+/* Analysis Section (Chart View) */
+.analysis-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-md);
+    background: var(--color-bg-secondary);
+    position: relative;
+    overflow: hidden;
+}
+
+.analysis-section.hidden {
+    display: none;
+}
+
+.chart-container {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    min-height: 0;
+    /* Important for Chart.js responsive resizing */
+    background: rgba(18, 18, 26, 0.5);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    padding: 15px;
+}
+
+.analysis-info {
+    text-align: center;
+    padding-top: 10px;
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+}

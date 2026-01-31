@@ -146,71 +146,90 @@
                 </div>
             </aside>
 
-            <!-- Center - Track Visualization -->
-            <section class="track-section" id="trackSection">
-                <!-- Track Info Banner -->
-                <div class="track-info" id="trackInfo">
-                    <div class="track-name-container">
-                        <h2 class="track-name" id="trackName">Select a Race</h2>
-                        <span class="track-country" id="trackCountry"></span>
-                    </div>
-                    <div class="lap-info" id="lapInfo">
-                        <span class="current-lap">Lap <span id="currentLap">--</span></span>
-                        <span class="lap-separator">/</span>
-                        <span class="total-laps"><span id="totalLaps">--</span></span>
-                    </div>
+            <!-- Center - Track & Analysis -->
+            <div class="center-panel" id="centerPanel">
+                <!-- View Tabs -->
+                <div class="view-tabs">
+                    <button class="view-tab active" data-view="track">Track Map</button>
+                    <button class="view-tab" data-view="analysis">Lap Analysis</button>
                 </div>
 
-                <!-- Canvas Container for Track Rendering -->
-                <div class="track-canvas-container" id="trackCanvasContainer">
-                    <canvas id="trackCanvas" class="track-canvas"></canvas>
-
-                    <!-- Overlay for loading state -->
-                    <div class="canvas-overlay" id="canvasOverlay">
-                        <div class="loading-spinner"></div>
-                        <p class="loading-text">Loading track data...</p>
+                <!-- Track Visualization -->
+                <section class="track-section" id="trackSection">
+                    <!-- Track Info Banner -->
+                    <div class="track-info" id="trackInfo">
+                        <div class="track-name-container">
+                            <h2 class="track-name" id="trackName">Select a Race</h2>
+                            <span class="track-country" id="trackCountry"></span>
+                        </div>
+                        <div class="lap-info" id="lapInfo">
+                            <span class="current-lap">Lap <span id="currentLap">--</span></span>
+                            <span class="lap-separator">/</span>
+                            <span class="total-laps"><span id="totalLaps">--</span></span>
+                        </div>
                     </div>
 
-                    <!-- Empty state -->
-                    <div class="empty-state" id="emptyState">
-                        <div class="empty-icon">🏁</div>
-                        <h3>No Race Loaded</h3>
-                        <p>Select a season and race from the top menu to begin visualization</p>
-                    </div>
-                </div>
+                    <!-- Canvas Container for Track Rendering -->
+                    <div class="track-canvas-container" id="trackCanvasContainer">
+                        <canvas id="trackCanvas" class="track-canvas"></canvas>
 
-                <!-- Playback Controls -->
-                <div class="playback-controls" id="playbackControls">
-                    <div class="playback-buttons">
-                        <button class="playback-btn" id="skipBackBtn" title="Skip to Start">
-                            <span>⏮</span>
-                        </button>
-                        <button class="playback-btn" id="prevLapBtn" title="Previous Lap">
-                            <span>⏪</span>
-                        </button>
-                        <button class="playback-btn playback-btn-main" id="playPauseBtn" title="Play/Pause">
-                            <span id="playPauseIcon">▶</span>
-                        </button>
-                        <button class="playback-btn" id="nextLapBtn" title="Next Lap">
-                            <span>⏩</span>
-                        </button>
-                        <button class="playback-btn" id="skipEndBtn" title="Skip to End">
-                            <span>⏭</span>
-                        </button>
+                        <!-- Overlay for loading state -->
+                        <div class="canvas-overlay" id="canvasOverlay">
+                            <div class="loading-spinner"></div>
+                            <p class="loading-text">Loading track data...</p>
+                        </div>
+
+                        <!-- Empty state -->
+                        <div class="empty-state" id="emptyState">
+                            <div class="empty-icon">🏁</div>
+                            <h3>No Race Loaded</h3>
+                            <p>Select a season and race from the top menu to begin visualization</p>
+                        </div>
                     </div>
 
-                    <div class="speed-control">
-                        <label for="speedSlider">Speed:</label>
-                        <input type="range" id="speedSlider" min="0.25" max="4" step="0.25" value="1">
-                        <span id="speedValue">1x</span>
-                    </div>
+                    <!-- Playback Controls -->
+                    <div class="playback-controls" id="playbackControls">
+                        <div class="playback-buttons">
+                            <button class="playback-btn" id="skipBackBtn" title="Skip to Start">
+                                <span>⏮</span>
+                            </button>
+                            <button class="playback-btn" id="prevLapBtn" title="Previous Lap">
+                                <span>⏪</span>
+                            </button>
+                            <button class="playback-btn playback-btn-main" id="playPauseBtn" title="Play/Pause">
+                                <span id="playPauseIcon">▶</span>
+                            </button>
+                            <button class="playback-btn" id="nextLapBtn" title="Next Lap">
+                                <span>⏩</span>
+                            </button>
+                            <button class="playback-btn" id="skipEndBtn" title="Skip to End">
+                                <span>⏭</span>
+                            </button>
+                        </div>
 
-                    <div class="timeline-container">
-                        <input type="range" id="timelineSlider" class="timeline-slider" min="0" max="100" value="0">
-                        <div class="timeline-markers" id="timelineMarkers"></div>
+                        <div class="speed-control">
+                            <label for="speedSlider">Speed:</label>
+                            <input type="range" id="speedSlider" min="0.25" max="4" step="0.25" value="1">
+                            <span id="speedValue">1x</span>
+                        </div>
+
+                        <div class="timeline-container">
+                            <input type="range" id="timelineSlider" class="timeline-slider" min="0" max="100" value="0">
+                            <div class="timeline-markers" id="timelineMarkers"></div>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+
+                <!-- Analysis/Charts Section -->
+                <section class="analysis-section hidden" id="analysisSection">
+                    <div class="chart-container">
+                        <canvas id="lapTimeChart"></canvas>
+                    </div>
+                    <div class="analysis-info">
+                        <p>Compare lap times across all laps for selected drivers.</p>
+                    </div>
+                </section>
+            </div> <!-- End center-panel -->
 
             <!-- Right Sidebar - Telemetry & Data -->
             <aside class="sidebar sidebar-right" id="sidebarRight">
@@ -426,6 +445,9 @@
 
     <!-- Track Visualization -->
     <script src="js/trackRenderer.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Telemetry Display -->
     <script src="js/telemetry.js"></script>
