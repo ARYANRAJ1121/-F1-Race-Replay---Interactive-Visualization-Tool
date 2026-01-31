@@ -134,14 +134,30 @@ cd -F1-Race-Replay---Interactive-Visualization-Tool
 pip install -r requirements.txt
 ```
 
-### Step 3: Start the Backend Server
+### Step 3: Start the Backend Server (Terminal 1)
+
+Open a terminal and run:
 
 ```bash
 cd backend
 python -m uvicorn main:app --reload --port 8080
 ```
 
-### Step 4: Access the Application
+*Keep this terminal running.*
+
+### Step 4: Start the Frontend (Terminal 2)
+
+Open a **new** terminal (in the project root) and run:
+
+```bash
+cd frontend
+python -m http.server 5500
+```
+
+### Step 5: Access the Application
+
+Open your browser and visit:
+**<http://127.0.0.1:5500>**
 
 - **API Documentation**: <http://127.0.0.1:8080/docs>
 - **Health Check**: <http://127.0.0.1:8080/health>
