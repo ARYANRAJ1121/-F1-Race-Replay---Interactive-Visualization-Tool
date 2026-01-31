@@ -43,7 +43,7 @@ class AudioManager {
 
         // Create gain node for volume
         this.gainNode = this.ctx.createGain();
-        this.gainNode.gain.value = 0.1; // Start volume
+        this.gainNode.gain.value = 0.25; // Increased volume
 
         // Filter (Lowpass to muffle high pitch)
         this.filter = this.ctx.createBiquadFilter();
@@ -54,6 +54,10 @@ class AudioManager {
         this.oscillator.connect(this.filter);
         this.filter.connect(this.gainNode);
         this.gainNode.connect(this.ctx.destination);
+
+        if (this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
 
         this.oscillator.start();
     }

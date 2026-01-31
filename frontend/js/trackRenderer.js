@@ -338,6 +338,12 @@ class TrackRenderer {
 
             // Check for lap completion
             if (car.trackIndex >= trackLength) {
+                // If it's the leader and we reached total laps, FINISH race
+                if (car.position === 1 && this.currentLap >= this.totalLaps) {
+                    this.finishRace();
+                    return;
+                }
+
                 car.trackIndex = car.trackIndex % trackLength;
                 car.lapCount++;
                 car.lastLapTime = now - this.lapStartTime;
@@ -582,6 +588,24 @@ class TrackRenderer {
         this.cars.clear();
         this.carTrails.clear();
         this.render();
+    }
+
+    /**
+     * Finish the race replay
+     */
+    finishRace() {
+        this.pausePlayback();
+        if (typeof AppState !== 'undefined') {
+            AppState.isPlaying = false;
+            // Update UI button manually since we bypassed app.togglePlayback
+            const icon = document.getElementById('playPauseIcon');
+            if (icon) icon.textContent = '▶';
+
+            if (AppState.audioManager) {
+                AppState.audioManager.stopEngine();
+            }
+        }
+        console.log("🏁 Race Finished!");
     }
 
     /**
