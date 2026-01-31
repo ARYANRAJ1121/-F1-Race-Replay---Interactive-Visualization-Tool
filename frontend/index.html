@@ -111,8 +111,17 @@
             <!-- Left Sidebar - Driver List & Standings -->
             <aside class="sidebar sidebar-left" id="sidebarLeft">
                 <div class="sidebar-header">
-                    <h2 class="sidebar-title">Drivers</h2>
-                    <span class="driver-count" id="driverCount">0 drivers</span>
+                    <div class="header-row">
+                        <h2 class="sidebar-title">Drivers</h2>
+                        <span class="driver-count" id="driverCount">0 drivers</span>
+                    </div>
+                    <div class="comparison-control">
+                        <label class="switch">
+                            <input type="checkbox" id="comparisonToggle">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="toggle-label">Vs Mode</span>
+                    </div>
                 </div>
 
                 <div class="driver-list" id="driverList">
@@ -213,69 +222,129 @@
                 </div>
 
                 <div class="telemetry-panel" id="telemetryPanel">
-                    <!-- Speed Gauge -->
-                    <div class="telemetry-card" id="speedCard">
-                        <div class="telemetry-label">Speed</div>
-                        <div class="telemetry-value">
-                            <span id="speedValue" class="value-large">---</span>
-                            <span class="value-unit">km/h</span>
+                    <div class="telemetry-column" id="telemetryColA">
+
+                        <div class="telemetry-card" id="speedCard">
+                            <div class="telemetry-label">Speed</div>
+                            <div class="telemetry-value">
+                                <span id="speedValue" class="value-large">---</span>
+                                <span class="value-unit">km/h</span>
+                            </div>
+                            <div class="telemetry-bar">
+                                <div class="bar-fill speed-bar" id="speedBar" style="width: 0%"></div>
+                            </div>
                         </div>
-                        <div class="telemetry-bar">
-                            <div class="bar-fill speed-bar" id="speedBar" style="width: 0%"></div>
+
+                        <div class="telemetry-card" id="throttleCard">
+                            <div class="telemetry-label">Throttle</div>
+                            <div class="telemetry-value">
+                                <span id="throttleValue" class="value-large">---</span>
+                                <span class="value-unit">%</span>
+                            </div>
+                            <div class="telemetry-bar">
+                                <div class="bar-fill throttle-bar" id="throttleBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="telemetry-card" id="brakeCard">
+                            <div class="telemetry-label">Brake</div>
+                            <div class="telemetry-value">
+                                <span id="brakeValue" class="value-large">---</span>
+                                <span class="value-unit">%</span>
+                            </div>
+                            <div class="telemetry-bar">
+                                <div class="bar-fill brake-bar" id="brakeBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="telemetry-card telemetry-card-small" id="gearCard">
+                            <div class="telemetry-label">Gear</div>
+                            <div class="gear-display" id="gearDisplay">N</div>
+                        </div>
+
+                        <div class="telemetry-card telemetry-card-small" id="drsCard">
+                            <div class="telemetry-label">DRS</div>
+                            <div class="drs-indicator" id="drsIndicator">OFF</div>
+                        </div>
+
+                        <div class="telemetry-card" id="rpmCard">
+                            <div class="telemetry-label">RPM</div>
+                            <div class="telemetry-value">
+                                <span id="rpmValue" class="value-large">---</span>
+                            </div>
+                            <div class="rpm-lights" id="rpmLights">
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Throttle -->
-                    <div class="telemetry-card" id="throttleCard">
-                        <div class="telemetry-label">Throttle</div>
-                        <div class="telemetry-value">
-                            <span id="throttleValue" class="value-large">---</span>
-                            <span class="value-unit">%</span>
-                        </div>
-                        <div class="telemetry-bar">
-                            <div class="bar-fill throttle-bar" id="throttleBar" style="width: 0%"></div>
-                        </div>
-                    </div>
+                    <div class="telemetry-column hidden" id="telemetryColB">
 
-                    <!-- Brake -->
-                    <div class="telemetry-card" id="brakeCard">
-                        <div class="telemetry-label">Brake</div>
-                        <div class="telemetry-value">
-                            <span id="brakeValue" class="value-large">---</span>
-                            <span class="value-unit">%</span>
+                        <div class="telemetry-card" id="speedCardB">
+                            <div class="telemetry-label">Speed</div>
+                            <div class="telemetry-value">
+                                <span id="speedValueB" class="value-large">---</span>
+                                <span class="value-unit">km/h</span>
+                            </div>
+                            <div class="telemetry-bar">
+                                <div class="bar-fill speed-bar" id="speedBarB" style="width: 0%"></div>
+                            </div>
                         </div>
-                        <div class="telemetry-bar">
-                            <div class="bar-fill brake-bar" id="brakeBar" style="width: 0%"></div>
+
+                        <div class="telemetry-card" id="throttleCardB">
+                            <div class="telemetry-label">Throttle</div>
+                            <div class="telemetry-value">
+                                <span id="throttleValueB" class="value-large">---</span>
+                                <span class="value-unit">%</span>
+                            </div>
+                            <div class="telemetry-bar">
+                                <div class="bar-fill throttle-bar" id="throttleBarB" style="width: 0%"></div>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Gear -->
-                    <div class="telemetry-card telemetry-card-small" id="gearCard">
-                        <div class="telemetry-label">Gear</div>
-                        <div class="gear-display" id="gearDisplay">N</div>
-                    </div>
-
-                    <!-- DRS -->
-                    <div class="telemetry-card telemetry-card-small" id="drsCard">
-                        <div class="telemetry-label">DRS</div>
-                        <div class="drs-indicator" id="drsIndicator">OFF</div>
-                    </div>
-
-                    <!-- RPM -->
-                    <div class="telemetry-card" id="rpmCard">
-                        <div class="telemetry-label">RPM</div>
-                        <div class="telemetry-value">
-                            <span id="rpmValue" class="value-large">---</span>
+                        <div class="telemetry-card" id="brakeCardB">
+                            <div class="telemetry-label">Brake</div>
+                            <div class="telemetry-value">
+                                <span id="brakeValueB" class="value-large">---</span>
+                                <span class="value-unit">%</span>
+                            </div>
+                            <div class="telemetry-bar">
+                                <div class="bar-fill brake-bar" id="brakeBarB" style="width: 0%"></div>
+                            </div>
                         </div>
-                        <div class="rpm-lights" id="rpmLights">
-                            <span class="rpm-light"></span>
-                            <span class="rpm-light"></span>
-                            <span class="rpm-light"></span>
-                            <span class="rpm-light"></span>
-                            <span class="rpm-light"></span>
-                            <span class="rpm-light"></span>
-                            <span class="rpm-light"></span>
-                            <span class="rpm-light"></span>
+
+                        <div class="telemetry-card telemetry-card-small" id="gearCardB">
+                            <div class="telemetry-label">Gear</div>
+                            <div class="gear-display" id="gearDisplayB">N</div>
+                        </div>
+
+                        <div class="telemetry-card telemetry-card-small" id="drsCardB">
+                            <div class="telemetry-label">DRS</div>
+                            <div class="drs-indicator" id="drsIndicatorB">OFF</div>
+                        </div>
+
+                        <div class="telemetry-card" id="rpmCardB">
+                            <div class="telemetry-label">RPM</div>
+                            <div class="telemetry-value">
+                                <span id="rpmValueB" class="value-large">---</span>
+                            </div>
+                            <div class="rpm-lights" id="rpmLightsB">
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                                <span class="rpm-light"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
