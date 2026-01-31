@@ -13,7 +13,9 @@
 // ============================================
 
 class TelemetryManager {
-    constructor() {
+    constructor(suffix = '') {
+        this.suffix = suffix; // '' for primary, 'B' for secondary
+
         // Current telemetry data
         this.currentData = null;
         this.driverCode = null;
@@ -54,28 +56,29 @@ class TelemetryManager {
      * Cache DOM elements for performance
      */
     cacheElements() {
+        const s = this.suffix;
         this.elements = {
             // Values
-            speedValue: $('speedValue'),
-            throttleValue: $('throttleValue'),
-            brakeValue: $('brakeValue'),
-            gearDisplay: $('gearDisplay'),
-            drsIndicator: $('drsIndicator'),
-            rpmValue: $('rpmValue'),
+            speedValue: $(`speedValue${s}`),
+            throttleValue: $(`throttleValue${s}`),
+            brakeValue: $(`brakeValue${s}`),
+            gearDisplay: $(`gearDisplay${s}`),
+            drsIndicator: $(`drsIndicator${s}`),
+            rpmValue: $(`rpmValue${s}`),
 
             // Bars
-            speedBar: $('speedBar'),
-            throttleBar: $('throttleBar'),
-            brakeBar: $('brakeBar'),
+            speedBar: $(`speedBar${s}`),
+            throttleBar: $(`throttleBar${s}`),
+            brakeBar: $(`brakeBar${s}`),
 
             // RPM lights
-            rpmLights: $('rpmLights'),
+            rpmLights: $(`rpmLights${s}`),
 
             // Driver select
-            driverSelect: $('telemetryDriverSelect'),
+            driverSelect: $(`telemetryDriverSelect${s}`),
 
-            // Lap times
-            lapTimesBody: $('lapTimesBody')
+            // Lap times (Only for primary currently)
+            lapTimesBody: s === '' ? $('lapTimesBody') : null
         };
     }
 

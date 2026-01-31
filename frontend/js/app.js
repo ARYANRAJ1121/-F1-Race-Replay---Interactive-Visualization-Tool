@@ -92,6 +92,7 @@ function initializeTrackRenderer() {
  */
 function initializeTelemetryManager() {
     AppState.telemetryManager = new TelemetryManager();
+    AppState.telemetryManagerB = new TelemetryManager('B');
 }
 
 /**
@@ -208,6 +209,12 @@ function setupEventListeners() {
         });
     }
 
+    // Comparison Toggle
+    const comparisonToggle = $('comparisonToggle');
+    if (comparisonToggle) {
+        comparisonToggle.addEventListener('change', (e) => toggleComparisonMode(e.target.checked));
+    }
+
     // Speed slider - controls race replay speed
     const speedSlider = $('speedSlider');
     const speedValue = $('speedValue');
@@ -297,29 +304,29 @@ function togglePlayback() {
     const targetState = !AppState.isPlaying;
     AppState.isPlaying = targetState;
 
-    // 1. Control Track Renderer (Race Replay)
     if (targetState) {
-        AppState.trackRenderer.startAnimation();
+        AppState.trackRenderer.startPlayback();
     } else {
-        AppState.trackRenderer.stopAnimation();
+        AppState.trackRenderer.pausePlayback();
     }
 
-    // 2. Control Telemetry Manager
-    // We stop the autonomous telemetry loop to prevent it from running independently
-    // The TrackRenderer will drive the telemetry updates during the race animation
-    AppState.telemetryManager.stopPlayback();
+    // Sync telemetry A
+    const tm = AppState.telemetryManager;
+    if (tm && tm.currentData) {
+        if (targetState) tm.startPlayback((pos, progress) => updateTimelineSlider(progress * 100));
+        else tm.stopPlayback();
+    }
 
-    updatePlayPauseButton();
-}
+    // Sync telemetry B
+    const tmB = AppState.telemetryManagerB;
+    if (tmB && tmB.currentData) {
+        if (targetState) tmB.startPlayback(); // No slider update from B to avoid conflict
+        else tmB.stopPlayback();
+    }
 
-/**
- * Update play/pause button icon
- */
-function updatePlayPauseButton() {
+    // Update button icon
     const icon = $('playPauseIcon');
-    if (icon) {
-        icon.textContent = AppState.isPlaying ? '⏸' : '▶';
-    }
+    if (icon) icon.textContent = targetState ? '⏸' : '▶';
 }
 
 /**
@@ -572,13 +579,16 @@ function positionCarsOnTrack(drivers, xCoords, yCoords) {
  * Load telemetry for a driver
  * @param {string} driverCode 
  */
-async function loadDriverTelemetry(driverCode) {
+async function loadDriverTelemetry(driverCode, suffix = '') {
     if (!AppState.season || !AppState.raceRound || !AppState.sessionType) {
         showWarning('Please load a session first');
         return;
     }
 
-    updateStatus('Loading telemetry...', 'loading');
+    // Pick manager
+    const manager = suffix === 'B' ? AppState.telemetryManagerB : AppState.telemetryManager;
+
+    updateStatus(`Loading telemetry ${suffix}...`, 'loading');
 
     try {
         const telemetryData = await AppState.api.getTelemetry(
@@ -588,19 +598,22 @@ async function loadDriverTelemetry(driverCode) {
             driverCode
         );
 
-        AppState.telemetryManager.loadTelemetry(telemetryData);
-        AppState.trackRenderer.selectDriver(driverCode);
+        manager.loadTelemetry(telemetryData);
 
-        // Load lap times for this driver
-        const lapsData = await AppState.api.getLaps(
-            AppState.season,
-            AppState.raceRound,
-            AppState.sessionType,
-            { driver: driverCode }
-        );
+        // Only select on track if primary
+        if (suffix !== 'B') {
+            AppState.trackRenderer.selectDriver(driverCode);
+            // Load lap times for this driver
+            const lapsData = await AppState.api.getLaps(
+                AppState.season,
+                AppState.raceRound,
+                AppState.sessionType,
+                { driver: driverCode }
+            );
 
-        if (lapsData.laps) {
-            AppState.telemetryManager.displayLapTimes(lapsData.laps);
+            if (lapsData.laps) {
+                AppState.telemetryManager.displayLapTimes(lapsData.laps);
+            }
         }
 
         updateStatus('Ready', 'ready');
@@ -612,6 +625,8 @@ async function loadDriverTelemetry(driverCode) {
         console.error('Load telemetry error:', error);
     }
 }
+
+
 
 // ============================================
 // UI Update Functions
@@ -641,6 +656,30 @@ function updateTrackInfo(sessionData) {
 function updateDriverList(drivers) {
     const driverList = $('driverList');
     const driverCount = $('driverCount');
+
+    // Also populate dropdowns
+    const populateSelect = (id, suffix = '') => {
+        const sel = $(id);
+        if (!sel) return;
+        const currentVal = sel.value;
+        sel.innerHTML = '<option value="">Select Driver</option>';
+        drivers.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.code || d.driver_code;
+            opt.textContent = `${d.code} - ${d.name || d.full_name}`;
+            sel.appendChild(opt);
+        });
+        if (currentVal) sel.value = currentVal;
+
+        // Ensure listener if not present (B specific)
+        if (suffix === 'B' && !sel.hasAttribute('data-listening')) {
+            sel.addEventListener('change', (e) => loadDriverTelemetry(e.target.value, 'B'));
+            sel.setAttribute('data-listening', 'true');
+        }
+    };
+
+    populateSelect('telemetryDriverSelect');
+    populateSelect('telemetryDriverSelectB', 'B'); // Might act if exists
 
     if (!driverList) return;
 
@@ -687,10 +726,53 @@ function updateDriverList(drivers) {
 
             AppState.telemetryManager.setSelectedDriver(driverCode);
             loadDriverTelemetry(driverCode);
+            // Sync dropdown A
+            const selA = $('telemetryDriverSelect');
+            if (selA) selA.value = driverCode;
         });
 
         driverList.appendChild(card);
     });
+}
+
+/**
+ * Toggle Comparison Mode
+ */
+function toggleComparisonMode(enabled) {
+    const colB = $('telemetryColB');
+    if (colB) {
+        if (enabled) {
+            colB.classList.remove('hidden');
+            ensureSecondaryDropdown();
+        } else {
+            colB.classList.add('hidden');
+            // Hide dropdown B?
+            const selB = $('telemetryDriverSelectB');
+            if (selB) selB.style.display = 'none';
+        }
+    }
+}
+
+function ensureSecondaryDropdown() {
+    let selB = $('telemetryDriverSelectB');
+    if (!selB) {
+        // Insert into sidebar header
+        const header = $('telemetryDriverSelect')?.parentElement;
+        if (header) {
+            selB = document.createElement('select');
+            selB.id = 'telemetryDriverSelectB';
+            selB.className = 'driver-select';
+            selB.style.marginTop = '10px'; // Spacing
+            header.appendChild(selB);
+
+            // Populate if drivers loaded
+            if (AppState.sessionData && AppState.sessionData.drivers) {
+                // Re-run update to populate
+                updateDriverList(AppState.sessionData.drivers);
+            }
+        }
+    }
+    if (selB) selB.style.display = 'block';
 }
 
 // ============================================
