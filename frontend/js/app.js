@@ -32,7 +32,11 @@ const AppState = {
     trackRenderer: null,
     telemetryManager: null,
     telemetryManagerB: null,
+    trackRenderer: null,
+    telemetryManager: null,
+    telemetryManagerB: null,
     chartManager: null,
+    audioManager: null,
 
     // Chart Data
     driverLaps: {}, // Map of driverCode -> laps array
@@ -57,7 +61,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize components
     initializeTrackRenderer();
     initializeTelemetryManager();
+    initializeTelemetryManager();
     AppState.chartManager = new ChartManager('lapTimeChart');
+    AppState.audioManager = new AudioManager();
 
     // Setup event listeners
     setupEventListeners();
@@ -337,8 +343,10 @@ function togglePlayback() {
 
     if (targetState) {
         AppState.trackRenderer.startPlayback();
+        AppState.audioManager.startEngine();
     } else {
         AppState.trackRenderer.pausePlayback();
+        AppState.audioManager.stopEngine();
     }
 
     // Sync telemetry A

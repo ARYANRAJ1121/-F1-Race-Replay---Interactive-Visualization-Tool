@@ -104,8 +104,21 @@ class ChartManager {
      */
     parseTime(timeStr) {
         if (!timeStr) return NaN;
+
+        // Handle "0 days 00:01:23.456" format
+        if (typeof timeStr === 'string' && timeStr.includes('days')) {
+            const parts = timeStr.split('days');
+            if (parts.length > 1) {
+                timeStr = parts[parts.length - 1].trim();
+            }
+        }
+
         const parts = timeStr.split(':');
-        if (parts.length === 2) {
+        if (parts.length === 3) {
+            // H:M:S
+            return parseFloat(parts[0]) * 3600 + parseFloat(parts[1]) * 60 + parseFloat(parts[2]);
+        } else if (parts.length === 2) {
+            // M:S
             return parseFloat(parts[0]) * 60 + parseFloat(parts[1]);
         }
         return parseFloat(timeStr);

@@ -382,6 +382,9 @@ class TrackRenderer {
             // Update telemetry if this car is selected
             if (code === this.selectedCar) {
                 this.updateSelectedCarTelemetry(car);
+                if (AppState.audioManager) {
+                    AppState.audioManager.updateEngine(car.currentSpeed);
+                }
             }
         }
 
@@ -593,6 +596,29 @@ class TrackRenderer {
             }
         }
         return this.isPlaying;
+    }
+
+    /**
+     * Start playback
+     */
+    startPlayback() {
+        if (this.isPlaying) return;
+        this.isPlaying = true;
+        this.lastFrameTime = performance.now();
+        if (this.raceReplayActive) {
+            this.animateRace();
+        }
+    }
+
+    /**
+     * Pause playback
+     */
+    pausePlayback() {
+        this.isPlaying = false;
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
     }
 
     /**
