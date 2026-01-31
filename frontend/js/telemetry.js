@@ -425,9 +425,15 @@ class TelemetryManager {
     /**
      * Start telemetry playback
      * @param {Function} onUpdate - Callback with position data
+     * @param {Function} onFinish - Callback when playback finishes
      */
-    startPlayback(onUpdate) {
+    startPlayback(onUpdate, onFinish) {
         if (this.isPlaying || this.totalPoints === 0) return;
+
+        // Auto-reset if at end
+        if (this.currentIndex >= this.totalPoints - 1) {
+            this.currentIndex = 0;
+        }
 
         this.isPlaying = true;
         this.lastUpdateTime = performance.now();
@@ -450,6 +456,7 @@ class TelemetryManager {
                 // Check if we've reached the end
                 if (this.currentIndex >= this.totalPoints - 1) {
                     this.stopPlayback();
+                    if (onFinish) onFinish();
                     return;
                 }
             }

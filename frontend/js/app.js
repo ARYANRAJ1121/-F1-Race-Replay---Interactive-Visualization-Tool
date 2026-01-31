@@ -336,36 +336,59 @@ function setupPlaybackControls() {
 /**
  * Toggle playback - Controls race replay for all cars and syncs telemetry
  */
+/**
+ * Toggle playback - Controls race replay for all cars and syncs telemetry
+ */
 function togglePlayback() {
     // Determine target state based on current state (toggle)
     const targetState = !AppState.isPlaying;
     AppState.isPlaying = targetState;
 
+    // Update UI immediately
+    updatePlayButton(targetState);
+
     if (targetState) {
+        // Start
         AppState.trackRenderer.startPlayback();
-        AppState.audioManager.startEngine();
+        if (AppState.audioManager) AppState.audioManager.startEngine();
     } else {
+        // Stop
         AppState.trackRenderer.pausePlayback();
-        AppState.audioManager.stopEngine();
+        if (AppState.audioManager) AppState.audioManager.stopEngine();
     }
 
     // Sync telemetry A
     const tm = AppState.telemetryManager;
     if (tm && tm.currentData) {
-        if (targetState) tm.startPlayback((pos, progress) => updateTimelineSlider(progress * 100));
-        else tm.stopPlayback();
+        if (targetState) {
+            tm.startPlayback(
+                (pos, progress) => updateTimelineSlider(progress * 100),
+                () => handlePlaybackFinished()
+            );
+        } else {
+            tm.stopPlayback();
+        }
     }
 
     // Sync telemetry B
     const tmB = AppState.telemetryManagerB;
     if (tmB && tmB.currentData) {
-        if (targetState) tmB.startPlayback(); // No slider update from B to avoid conflict
+        if (targetState) tmB.startPlayback(null, null); // Secondary doesn't drive main logic
         else tmB.stopPlayback();
     }
+}
 
-    // Update button icon
+function handlePlaybackFinished() {
+    console.log('Playback finished');
+    AppState.isPlaying = false;
+    updatePlayButton(false);
+    AppState.trackRenderer.pausePlayback(); // Ensure renderer stops
+    if (AppState.audioManager) AppState.audioManager.stopEngine();
+}
+
+function updatePlayButton(isPlaying) {
     const icon = $('playPauseIcon');
-    if (icon) icon.textContent = targetState ? '⏸' : '▶';
+    if (icon) icon.textContent = isPlaying ? '⏸' : '▶';
 }
 
 /**
