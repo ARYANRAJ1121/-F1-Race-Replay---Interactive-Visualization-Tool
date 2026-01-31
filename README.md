@@ -288,10 +288,10 @@ python -m uvicorn main:app --reload --port 9000
 - [x] Real-time telemetry display with animated bars
 - [x] Interactive driver selection
 - [x] Playback controls (play/pause, speed, timeline)
+- [x] Driver comparison mode (side-by-side telemetry)
 
 ### 🔮 Future Enhancements
 
-- [ ] Driver comparison mode (side-by-side telemetry)
 - [ ] Lap time analysis charts
 - [ ] Sector-by-sector breakdown
 - [ ] Race strategy timeline
