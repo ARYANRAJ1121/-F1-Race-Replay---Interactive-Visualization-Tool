@@ -296,7 +296,6 @@ python -m uvicorn main:app --reload --port 9000
 - [ ] Sector-by-sector breakdown
 - [ ] Race strategy timeline
 - [ ] Weather data integration
-- [ ] Multi-language support
 
 ---
 
