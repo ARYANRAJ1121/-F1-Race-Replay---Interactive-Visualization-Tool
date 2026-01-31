@@ -31,6 +31,11 @@ const AppState = {
     // Instances
     trackRenderer: null,
     telemetryManager: null,
+    telemetryManagerB: null,
+    chartManager: null,
+
+    // Chart Data
+    driverLaps: {}, // Map of driverCode -> laps array
 
     // API instance
     api: null
@@ -52,6 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize components
     initializeTrackRenderer();
     initializeTelemetryManager();
+    AppState.chartManager = new ChartManager('lapTimeChart');
 
     // Setup event listeners
     setupEventListeners();
@@ -243,6 +249,31 @@ function setupEventListeners() {
             }
         });
     }
+
+    // View Tabs (Track vs Analysis)
+    document.querySelectorAll('.view-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Toggle active state
+            document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            const view = tab.dataset.view;
+            const trackSection = $('trackSection');
+            const analysisSection = $('analysisSection');
+            const centerPanel = $('centerPanel');
+
+            if (view === 'track') {
+                trackSection.classList.remove('hidden');
+                analysisSection.classList.add('hidden');
+                if (centerPanel) centerPanel.style.overflow = 'hidden';
+            } else {
+                trackSection.classList.add('hidden');
+                analysisSection.classList.remove('hidden');
+                // Render chart if needed
+                if (AppState.chartManager) updateCharts();
+            }
+        });
+    });
 }
 
 /**
@@ -612,7 +643,17 @@ async function loadDriverTelemetry(driverCode, suffix = '') {
             );
 
             if (lapsData.laps) {
-                AppState.telemetryManager.displayLapTimes(lapsData.laps);
+                // Store laps for chart
+                if (!AppState.driverLaps) AppState.driverLaps = {};
+                AppState.driverLaps[driverCode] = lapsData.laps;
+
+                // Only display in table if primary
+                if (suffix !== 'B') {
+                    AppState.telemetryManager.displayLapTimes(lapsData.laps);
+                }
+
+                // Update Charts
+                updateCharts();
             }
         }
 
@@ -778,6 +819,54 @@ function ensureSecondaryDropdown() {
 // ============================================
 // Global Error Handler
 // ============================================
+
+/**
+ * Collect data for charts and update
+ */
+function updateCharts() {
+    if (!AppState.chartManager) return;
+
+    // Get active drivers
+    const drivers = [];
+    if (AppState.telemetryManager && AppState.telemetryManager.driverCode) {
+        const code = AppState.telemetryManager.driverCode;
+        if (AppState.driverLaps[code]) {
+            drivers.push({
+                name: code,
+                code: code,
+                color: getDriverColor(code),
+                laps: AppState.driverLaps[code]
+            });
+        }
+    }
+
+    // Driver B
+    if (AppState.telemetryManagerB && AppState.telemetryManagerB.driverCode) {
+        const code = AppState.telemetryManagerB.driverCode;
+        if (AppState.driverLaps[code]) {
+            drivers.push({
+                name: code,
+                code: code,
+                color: getDriverColor(code, true), // distinct color?
+                laps: AppState.driverLaps[code]
+            });
+        }
+    }
+
+    AppState.chartManager.update(drivers);
+}
+
+function getDriverColor(code) {
+    // Find driver in driver list to get team color
+    if (!AppState.sessionData || !AppState.sessionData.drivers) return '#fff';
+    const d = AppState.sessionData.drivers.find(d => (d.code || d.driver_code) === code);
+    return d ? (d.color || getTeamColor(d.team)) : '#fff';
+}
+
+function getChartData() {
+    // Helper used by tab click
+    updateCharts(); // Reuse logic
+}
 
 window.addEventListener('error', (event) => {
     console.error('Unhandled error:', event.error);
