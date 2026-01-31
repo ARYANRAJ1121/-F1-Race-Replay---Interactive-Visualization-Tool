@@ -1794,3 +1794,33 @@ input:checked+.slider:before {
     color: var(--text-muted);
     font-size: var(--font-size-xs);
 }
+
+/* Track Section filling center panel */
+.track-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.track-canvas-container {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    /* height: 100%; removed to let flex handle it */
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    /* Ensure canvas behaves */
+    align-items: center;
+    justify-content: center;
+}
+
+canvas#trackCanvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
